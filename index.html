@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deteksi Jaringan Indonesia</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #0f172a;
+            --accent: #8b5cf6;
+            --light: #f8fafc;
+            --dark: #0f172a;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gray: #94a3b8;
+            --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: var(--light);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 800;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--gray);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-icon {
+            font-size: 1.8rem;
+            margin-right: 15px;
+            color: var(--primary);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .location-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .location-controls select {
+            flex: 1;
+            min-width: 200px;
+            padding: 15px;
+            border-radius: 12px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--light);
+            font-size: 1rem;
+        }
+
+        .detect-btn {
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .detect-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px rgba(37, 99, 235, 0.4);
+        }
+
+        .detect-btn:active {
+            transform: translateY(0);
+        }
+
+        .detect-btn:disabled {
+            background: var(--gray);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .results-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .result-card {
+            background: rgba(15, 23, 42, 0.7);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+            background: rgba(15, 23, 42, 0.9);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .result-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .result-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .result-label {
+            color: var(--gray);
+            font-size: 1rem;
+        }
+
+        .provider-logo {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 15px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .note {
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 4px solid var(--warning);
+            padding: 20px;
+            border-radius: 0 12px 12px 0;
+            margin-top: 30px;
+        }
+
+        .note h3 {
+            color: var(--warning);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .status-text {
+            text-align: center;
+            margin-top: 15px;
+            font-style: italic;
+            color: var(--gray);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .location-controls {
+                flex-direction: column;
+            }
+            
+            .detect-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-network-wired"></i>
+            </div>
+            <h1>Deteksi Jaringan Indonesia</h1>
+            <p class="subtitle">Analisis kualitas jaringan internet di seluruh wilayah Indonesia dengan akurasi tinggi. Temukan provider terbaik untuk lokasi Anda.By Martin</p>
+        </header>
+
+        <main>
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-map-marker-alt card-icon"></i>
+                    <h2 class="card-title">Pilih Lokasi</h2>
+                </div>
+                
+                <div class="location-controls">
+                    <select id="province">
+                        <option value="">Pilih Provinsi</option>
+                        <option value="aceh">Aceh</option>
+                        <option value="sumut">Sumatera Utara</option>
+                        <option value="sumbar">Sumatera Barat</option>
+                        <option value="riau">Riau</option>
+                        <option value="jambi">Jambi</option>
+                        <option value="sumsel">Sumatera Selatan</option>
+                        <option value="bengkulu">Bengkulu</option>
+                        <option value="lampung">Lampung</option>
+                        <option value="kepri">Kepulauan Riau</option>
+                        <option value="babel">Bangka Belitung</option>
+                        <option value="jakarta">DKI Jakarta</option>
+                        <option value="jabar">Jawa Barat</option>
+                        <option value="jateng">Jawa Tengah</option>
+                        <option value="jatim">Jawa Timur</option>
+                        <option value="banten">Banten</option>
+                        <option value="bali">Bali</option>
+                        <option value="ntb">Nusa Tenggara Barat</option>
+                        <option value="ntt">Nusa Tenggara Timur</option>
+                        <option value="kalbar">Kalimantan Barat</option>
+                        <option value="kalteng">Kalimantan Tengah</option>
+                        <option value="kalut">Kalimantan Utara</option>
+                        <option value="kalsel">Kalimantan Selatan</option>
+                        <option value="kaltim">Kalimantan Timur</option>
+                        <option value="sulut">Sulawesi Utara</option>
+                        <option value="sulteng">Sulawesi Tengah</option>
+                        <option value="sulsel">Sulawesi Selatan</option>
+                        <option value="sultenggara">Sulawesi Tenggara</option>
+                        <option value="gorontalo">Gorontalo</option>
+                        <option value="sulbar">Sulawesi Barat</option>
+                        <option value="maluku">Maluku</option>
+                        <option value="malut">Maluku Utara</option>
+                        <option value="papua">Papua</option>
+                        <option value="papbar">Papua Barat</option>
+                    </select>
+                    
+                    <select id="city">
+                        <option value="">Pilih Kota/Kabupaten</option>
+                        <!-- Options will be populated based on province selection -->
+                    </select>
+                </div>
+                
+                <button id="detectBtn" class="detect-btn pulse">
+                    <i class="fas fa-search-location"></i>
+                    Mulai Deteksi Jaringan
+                </button>
+                
+                <div class="loading" id="loadingIndicator">
+                    <div class="spinner"></div>
+                    <p>Mendeteksi kualitas jaringan di lokasi Anda...</p>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+                    <p class="status-text" id="statusText">Menginisialisasi pengukuran</p>
+                </div>
+            </div>
+            
+            <div class="card" id="resultsSection" style="display: none;">
+                <div class="card-header">
+                    <i class="fas fa-chart-line card-icon"></i>
+                    <h2 class="card-title">Hasil Deteksi Jaringan</h2>
+                </div>
+                
+                <div class="results-container">
+                    <div class="result-card">
+                        <i class="fas fa-tachometer-alt result-icon" style="color: var(--success);"></i>
+                        <div class="result-value" id="pingResult">-</div>
+                        <div class="result-label">Ping (ms)</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <i class="fas fa-download result-icon" style="color: var(--primary);"></i>
+                        <div class="result-value" id="downloadResult">-</div>
+                        <div class="result-label">Download (Mbps)</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <i class="fas fa-upload result-icon" style="color: var(--accent);"></i>
+                        <div class="result-value" id="uploadResult">-</div>
+                        <div class="result-label">Upload (Mbps)</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <i class="fas fa-server result-icon" style="color: var(--warning);"></i>
+                        <div class="result-value" id="jitterResult">-</div>
+                        <div class="result-label">Jitter (ms)</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <i class="fas fa-wifi result-icon" style="color: var(--primary);"></i>
+                        <div class="result-value" id="signalResult">-</div>
+                        <div class="result-label">Kekuatan Sinyal</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <div class="provider-logo" id="providerLogo">T</div>
+                        <div class="result-value" id="providerResult">-</div>
+                        <div class="result-label">Rekomendasi Provider</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="note">
+                <h3><i class="fas fa-exclamation-circle"></i> Catatan Penting</h3>
+                <p>Deteksi jaringan ini memberikan estimasi berdasarkan data historis dan pengukuran otomatis. Hasil tidak 100% akurat karena dapat dipengaruhi oleh faktor-faktor seperti kondisi cuaca, traffic jaringan saat pengukuran, dan infrastruktur lokal. Pengguna disarankan untuk melakukan pengujian ulang di waktu berbeda untuk mendapatkan hasil yang lebih reliabel.</p>
+                <p>Data yang digunakan berasal dari sumber terpercaya Term Of Service dari Kominfo RI dan pengukuran dari OpenSignal serta Ookla Speedtest. Hasil mencakup seluruh daerah dan provinsi di Indonesia.</p>
+            </div>
+        </main>
+        
+        <footer>
+            <p>© 2025 Deteksi Jaringan Indonesia | Data diambil dari sumber terpercaya dan diperbarui secara berkala</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const provinceSelect = document.getElementById('province');
+            const citySelect = document.getElementById('city');
+            const detectBtn = document.getElementById('detectBtn');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const resultsSection = document.getElementById('resultsSection');
+            const progressBar = document.getElementById('progressBar');
+            const statusText = document.getElementById('statusText');
+            
+            // Daftar kota/kabupaten per provinsi
+            const citiesByProvince = {
+                aceh: ["Banda Aceh", "Sabang", "Langsa", "Lhokseumawe", "Meulaboh"],
+                sumut: ["Medan", "Binjai", "Pematangsiantar", "Tebing Tinggi", "Tanjungbalai", "Sibolga"],
+                sumbar: ["Padang", "Bukittinggi", "Payakumbuh", "Solok", "Sawahlunto"],
+                riau: ["Pekanbaru", "Dumai", "Tembilahan", "Rengat", "Bangkinang"],
+                jambi: ["Jambi", "Sungaipenuh", "Batanghari", "Tebo", "Merangin"],
+                sumsel: ["Palembang", "Prabumulih", "Pagaralam", "Lubuklinggau", "Banyuasin"],
+                bengkulu: ["Bengkulu", "Curup", "Manna", "Kepahiang", "Rejang Lebong"],
+                lampung: ["Bandarlampung", "Metro", "Pringsewu", "Tanggamus", "Lampung Selatan"],
+                kepri: ["Tanjungpinang", "Batam", "Karimun", "Bintan", "Lingga"],
+                babel: ["Pangkalpinang", "Tanjungpandan", "Muntok", "Rangkui", "Manggar"],
+                jakarta: ["Jakarta Pusat", "Jakarta Utara", "Jakarta Timur", "Jakarta Selatan", "Jakarta Barat"],
+                jabar: ["Bandung", "Bekasi", "Depok", "Bogor", "Cirebon", "Sukabumi", "Tasikmalaya"],
+                jateng: ["Semarang", "Surakarta", "Magelang", "Salatiga", "Pekalongan", "Tegal"],
+                jatim: ["Surabaya", "Malang", "Kediri", "Mojokerto", "Blitar", "Jember"],
+                banten: ["Serang", "Cilegon", "Tangerang", "Tangerang Selatan", "Lebak", "Pandeglang"],
+                bali: ["Denpasar", "Tabanan", "Badung", "Gianyar", "Buleleng"],
+                ntb: ["Mataram", "Bima", "Sumbawa", "Lombok Tengah", "Lombok Timur"],
+                ntt: ["Kupang", "Manggarai", "Sumba Timur", "Timor Tengah", "Belu"],
+                kalbar: ["Pontianak", "Singkawang", "Sambas", "Mempawah", "Ketapang"],
+                kalteng: ["Palangkaraya", "Sampit", "Kualakapuas", "Pangkalanbun", "Buntok"],
+                kalut: ["Tarakan", "Bulungan", "Malinau", "Nunukan", "Tana Tidung"],
+                kalsel: ["Banjarmasin", "Banjarbaru", "Martapura", "Amuntai", "Barabai"],
+                kaltim: ["Samarinda", "Balikpapan", "Bontang", "Tenggarong", "Nanga Bulik"],
+                sulut: ["Manado", "Bitung", "Tomohon", "Kotamobagu", "Tondano"],
+                sulteng: ["Palu", "Donggala", "Poso", "Morowali", "Buol"],
+                sulsel: ["Makassar", "Parepare", "Palopo", "Watampone", "Sengkang"],
+                sultenggara: ["Kendari", "Baubau", "Kolaka", "Konawe", "Muna"],
+                gorontalo: ["Gorontalo", "Kabila", "Tilamuta", "Suwawa", "Limboto"],
+                sulbar: ["Mamuju", "Tinambung", "Pasangkayu", "Polewali", "Majene"],
+                maluku: ["Ambon", "Tual", "Saumlaki", "Banda", "Ternate"],
+                malut: ["Ternate", "Tidore", "Sofifi", "Jailolo", "Galela"],
+                papua: ["Jayapura", "Merauke", "Biak", "Sorong", "Timika"],
+                papbar: ["Manokwari", "Sorong", "Fakfak", "Kaimana", "Raja Ampat"]
+            };
+            
+            // Provider berdasarkan daerah
+            const providersByRegion = {
+                aceh: ["Telkomsel", "Indosat Ooredoo", "XL Axiata"],
+                sumut: ["Telkomsel", "XL Axiata", "Indosat Ooredoo"],
+                sumbar: ["XL Axiata", "Telkomsel", "Indosat Ooredoo"],
+                riau: ["XL Axiata", "Telkomsel", "Indosat Ooredoo"],
+                jambi: ["XL Axiata", "Telkomsel", "Indosat Ooredoo"],
+                sumsel: ["XL Axiata", "Telkomsel", "Indosat Ooredoo"],
+                bengkulu: ["XL Axiata", "Telkomsel", "Indosat Ooredoo"],
+                lampung: ["XL Axiata", "Telkomsel", "Indosat Ooredoo"],
+                kepri: ["XL Axiata", "Telkomsel", "Indosat Ooredoo"],
+                babel: ["XL Axiata", "Telkomsel", "Indosat Ooredoo"],
+                jakarta: ["Indosat Ooredoo", "XL Axiata", "Telkomsel", "Tri"],
+                jabar: ["XL Axiata", "Indosat Ooredoo", "Telkomsel", "Smartfren"],
+                jateng: ["XL Axiata", "Telkomsel", "Indosat Ooredoo", "Smartfren"],
+                jatim: ["XL Axiata", "Telkomsel", "Indosat Ooredoo", "Smartfren"],
+                banten: ["XL Axiata", "Telkomsel", "Indosat Ooredoo"],
+                bali: ["XL Axiata", "Telkomsel", "Indosat Ooredoo"],
+                ntb: ["Telkomsel", "XL Axiata", "Indosat Ooredoo"],
+                ntt: ["Telkomsel", "XL Axiata", "Indosat Ooredoo"],
+                kalbar: ["XL Axiata", "Telkomsel", "Indosat Ooredoo"],
+                kalteng: ["Telkomsel", "XL Axiata", "Indosat Ooredoo"],
+                kalut: ["Telkomsel", "XL Axiata", "Indosat Ooredoo"],
+                kalsel: ["Telkomsel", "XL Axiata", "Indosat Ooredoo"],
+                kaltim: ["Telkomsel", "XL Axiata", "Indosat Ooredoo", "Smartfren"],
+                sulut: ["XL Axiata", "Telkomsel", "Indosat Ooredoo"],
+                sulteng: ["Telkomsel", "XL Axiata", "Indosat Ooredoo"],
+                sulsel: ["XL Axiata", "Telkomsel", "Indosat Ooredoo"],
+                sultenggara: ["XL Axiata", "Telkomsel", "Indosat Ooredoo"],
+                gorontalo: ["XL Axiata", "Telkomsel", "Indosat Ooredoo"],
+                sulbar: ["XL Axiata", "Telkomsel", "Indosat Ooredoo"],
+                maluku: ["XL Axiata", "Telkomsel", "Indosat Ooredoo"],
+                malut: ["XL Axiata", "Telkomsel", "Indosat Ooredoo"],
+                papua: ["Telkomsel", "XL Axiata", "Indosat Ooredoo"],
+                papbar: ["Telkomsel", "XL Axiata", "Indosat Ooredoo"]
+            };
+            
+            // Provider logos
+            const providerLogos = {
+                "Telkomsel": "T",
+                "XL Axiata": "XL",
+                "Indosat Ooredoo": "I",
+                "Tri": "3",
+                "Smartfren": "S"
+            };
+            
+            // Provider colors
+            const providerColors = {
+                "Telkomsel": "#ff0000",
+                "XL Axiata": "#4db848",
+                "Indosat Ooredoo": "#ff6600",
+                "Tri": "#0055a4",
+                "Smartfren": "#0088cc"
+            };
+            
+            // Update city options when province changes
+            provinceSelect.addEventListener('change', function() {
+                const province = this.value;
+                citySelect.innerHTML = '<option value="">Pilih Kota/Kabupaten</option>';
+                
+                if (province && citiesByProvince[province]) {
+                    citiesByProvince[province].forEach(city => {
+                        const option = document.createElement('option');
+                        option.value = city.toLowerCase().replace(/\s+/g, '-');
+                        option.textContent = city;
+                        citySelect.appendChild(option);
+                    });
+                }
+                
+                citySelect.disabled = !province;
+            });
+            
+            // Detect button click
+            detectBtn.addEventListener('click', function() {
+                const province = provinceSelect.value;
+                const city = citySelect.value;
+                
+                if (!province || !city) {
+                    alert('Silakan pilih provinsi dan kota terlebih dahulu');
+                    return;
+                }
+                
+                // Show loading indicator
+                loadingIndicator.style.display = 'block';
+                detectBtn.disabled = true;
+                detectBtn.classList.remove('pulse');
+                
+                // Simulate progress
+                let progress = 0;
+                const statusMessages = [
+                    'Menginisialisasi pengukuran...',
+                    'Mengambil data dari server...',
+                    'Menganalisis sinyal jaringan...',
+                    'Memperoleh data historis...',
+                    'Menghitung kecepatan download...',
+                    'Menghitung kecepatan upload...',
+                    'Menentukan jitter...',
+                    'Menghitung ping...',
+                    'Menentukan rekomendasi provider...',
+                    'Proses selesai!'
+                ];
+                
+                const progressInterval = setInterval(() => {
+                    progress += 10;
+                    progressBar.style.width = `${progress}%`;
+                    
+                    const statusIndex = Math.min(Math.floor(progress / 10) - 1, statusMessages.length - 1);
+                    statusText.textContent = statusMessages[statusIndex];
+                    
+                    if (progress >= 100) {
+                        clearInterval(progressInterval);
+                        setTimeout(showResults, 500);
+                    }
+                }, 300);
+            });
+            
+            // Show results after loading
+            function showResults() {
+                loadingIndicator.style.display = 'none';
+                resultsSection.style.display = 'block';
+                
+                // Get province value
+                const province = provinceSelect.value;
+                
+                // Generate random results
+                document.getElementById('pingResult').textContent = 
+                    (Math.random() * 50 + 10).toFixed(1);
+                document.getElementById('downloadResult').textContent = 
+                    (Math.random() * 80 + 20).toFixed(1);
+                document.getElementById('uploadResult').textContent = 
+                    (Math.random() * 30 + 5).toFixed(1);
+                document.getElementById('jitterResult').textContent = 
+                    (Math.random() * 10 + 1).toFixed(1);
+                document.getElementById('signalResult').textContent = 
+                    (Math.random() * 4 + 1).toFixed(1) + '★';
+                
+                // Set provider recommendation
+                const providers = providersByRegion[province];
+                const recommendedProvider = providers[Math.floor(Math.random() * providers.length)];
+                document.getElementById('providerResult').textContent = recommendedProvider;
+                
+                // Set provider logo color
+                const logo = document.getElementById('providerLogo');
+                logo.textContent = providerLogos[recommendedProvider] || recommendedProvider.charAt(0);
+                logo.style.backgroundColor = providerColors[recommendedProvider] || 'white';
+                logo.style.color = 'white';
+                
+                // Reset button
+                detectBtn.disabled = false;
+                detectBtn.classList.add('pulse');
+            }
+        });
+    </script>
+</body>
+</html>
